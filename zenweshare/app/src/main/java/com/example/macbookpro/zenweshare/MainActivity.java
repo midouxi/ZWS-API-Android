@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
 		buttonconnex.setOnClickListener(new OnClickListener() { // integration de l'�couteur
 			@Override
 			public void onClick(View arg0) {  // si le bouton  est cliqu� 
-				String url = "http://192.168.1.117:80/fr/app/login/mobile/"+ZWS_CLIENT_ID; // on compose l'url = adresse zenweshare + client id + l'encryptage du secret key
+				String url = "http://192.168.1.116:80/fr/app/login/mobile/"+ZWS_CLIENT_ID; // on compose l'url = adresse zenweshare + client id + l'encryptage du secret key
 				System.out.println(Uri.parse(url)); // pour le test
 				try{ // sniffer l'exception en cas ou ! 
 				Intent intent = new Intent( Intent.ACTION_VIEW, Uri.parse(url) ); //on cr�e un intent qui contient une page web
@@ -70,14 +70,13 @@ public class MainActivity extends Activity {
 		});
 		
 		// après la connexion si tout se passe bien il y aura une redirection vers l'app á travers le lien de allplayer://site.com
-		// on profite de cette redirection vers l'app pour passer les 2 valeurs user_id et l'access token et le lien sera comme ceci : allplayer://site.com/user_id/access_token
-		Uri data = getIntent().getData(); // on prend le site de redirection 
-        if (data != null && data.toString().startsWith(ZWS_CALLBACK_URL)) { // ce process ne se déclenche que si data n'est pas une valeur nulle ainsi qu'elle d�bute par allplayer://site.com
-			List<String> params = data.getPathSegments(); // on décortique le lien dans une liste chainée , il s'arrete dans chaque slash et il le stocke dans une case
-			final String request_code = params.get(0); // premiere case c'est user_id
-			System.out.println(request_code); // pour le test
+		// on profite de cette redirection vers l'app pour passer la valeur du requestcode et le lien sera comme ceci : allplayer://site.com/request_code
+		Uri data = getIntent().getData(); // on prend le site de redirection
+        if (data != null && data.toString().startsWith(ZWS_CALLBACK_URL) && data.toString().length()>20) { // ce process ne se déclenche que si data n'est pas une valeur nulle ainsi qu'elle débute par allplayer://site.com
+            List<String> params = data.getPathSegments(); // on décortique le lien dans une liste chainée , il s'arrete dans chaque slash et il le stocke dans une case
+            final String request_code = params.get(0); // premiere valeur apres le slash c'est le request code
             new FetchTask().execute(request_code);
-			//buttonconnex.setEnabled(false);
+                //buttonconnex.setEnabled(false);
 			}
 	}
         // creation du thread l'execution se fait en 3 temps : onPreExecute => DoInBackground => OnPostExecute
@@ -92,7 +91,7 @@ public class MainActivity extends Activity {
             protected String doInBackground(String... params) {
                 try {
                     HttpClient httpclient = new DefaultHttpClient();
-                    HttpPost httppost = new HttpPost("http://192.168.1.117:83/APIZWS/index44.php"); //
+                    HttpPost httppost = new HttpPost("http://192.168.1.116:83/APIZWS/index44.php"); //
 
                     // Add your data
                     List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
